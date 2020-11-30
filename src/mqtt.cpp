@@ -11,10 +11,10 @@ int mqTopicLen = 0; // strlen(mqTopic)
 
 // keep-alive stuff
 #define MQ_TIMEOUT (60*1000)    // in milliseconds
-static uint32_t mqLast = 0x100000; // when we last received something
-static uint32_t mqPing = 0;     // when we last sent a ping
-static uint32_t mqPingRx = 0;     // when we last received a ping response
-uint32_t mqPingMs = 0;   // timeing of last ping
+static volatile uint32_t mqLast = 0x100000; // when we last received something
+static volatile uint32_t mqPing = 0;         // when we last sent a ping
+static volatile uint32_t mqPingRx = 0;     // when we last received a ping response
+uint32_t volatile mqPingMs = 0;             // timeing of last ping
 
 // helper to subscribe to our own pings
 static void mqttSubPing() {
@@ -100,22 +100,32 @@ void mqttConnect() {
     mqttClient.connect();
 }
 
+//        
+
 void mqttLoop() {
-    if (millis() - mqPingRx > 20*MQ_TIMEOUT) {
-        printf("*** No MQTT response in %d seconds - resetting\n",  (millis()-mqPingRx)/1000);
+    uint32_t cachemqPingRx = mqPingRx;
+    if (millis() - cachemqPingRx > 2 * MQ_TIMEOUT)
+    {
+        printf("*** No MQTT response in %lu seconds - resetting\n", (millis() - cachemqPingRx) / 1000);
         ESP.restart();
     }
     if (!WiFi.isConnected()) return;
+    uint32_t cachemqLast = mqLast;
     if (!mqttClient.connected()) {
-        if (millis() - mqLast > 10000) {
+        if (millis() - cachemqLast > 10000)
+        {
             mqttConnect();
             mqLast = millis();
         }
-    } else if (millis() - mqLast > MQ_TIMEOUT) {
+    }
+    else if (millis() - cachemqLast > MQ_TIMEOUT)
+    {
         //printf("Reconnecting to MQTT\n");
         mqttConnect();
         mqLast = millis();
-    } else if (millis() - mqLast > MQ_TIMEOUT/2 && millis() - mqPing > MQ_TIMEOUT/2) {
+    }
+    else if (millis() - cachemqLast > MQ_TIMEOUT / 2 && millis() - mqPing > MQ_TIMEOUT / 2)
+    {
         char topic[41+6];
         strcpy(topic, mqTopic);
         strcat(topic, "/ping");
