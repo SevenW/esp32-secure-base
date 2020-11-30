@@ -14,7 +14,7 @@ int mqTopicLen = 0; // strlen(mqTopic)
 static volatile uint32_t mqLast = 0x100000; // when we last received something
 static volatile uint32_t mqPing = 0;        // when we last sent a ping
 static volatile uint32_t mqPingRx = 0;      // when we last received a ping response
-uint32_t volatile mqPingMs = 0;             // timeing of last ping
+volatile uint32_t mqPingMs = 0;             // timeing of last ping
 
 // helper to subscribe to our own pings
 static void mqttSubPing() {
