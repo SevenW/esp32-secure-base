@@ -12,8 +12,8 @@ int mqTopicLen = 0; // strlen(mqTopic)
 // keep-alive stuff
 #define MQ_TIMEOUT (60*1000)    // in milliseconds
 static volatile uint32_t mqLast = 0x100000; // when we last received something
-static volatile uint32_t mqPing = 0;         // when we last sent a ping
-static volatile uint32_t mqPingRx = 0;     // when we last received a ping response
+static volatile uint32_t mqPing = 0;        // when we last sent a ping
+static volatile uint32_t mqPingRx = 0;      // when we last received a ping response
 uint32_t volatile mqPingMs = 0;             // timeing of last ping
 
 // helper to subscribe to our own pings
@@ -99,8 +99,6 @@ void mqttConnect() {
 
     mqttClient.connect();
 }
-
-//        
 
 void mqttLoop() {
     uint32_t cachemqPingRx = mqPingRx;
